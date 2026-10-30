@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Kanipad</title>
+
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#ffcf8a">
+
+<!-- launched from a home screen this runs without browser chrome, so there is
+     no address bar for a small child to wander into -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Kanipad">
+
+<!-- Asset URLs carry a version stamp so a home-screen copy can't keep serving
+     an old file. BUMP EVERY VERSION STAMP WHENEVER A .js FILE OR styles.css
+     CHANGES. See "Shipping a new version" in the README. -->
+<link rel="stylesheet" href="styles.css?v=20261027-1">
+</head>
+<body>
+
+<!-- ============ MENU SCREEN ============ -->
+<section id="menu-screen" class="screen">
+  <div class="deco" aria-hidden="true">
+    <span>&#9834;</span><span>&#9835;</span><span>&#9833;</span><span>&#9834;</span><span>&#9835;</span><span>&#9833;</span>
+  </div>
+
+  <button id="btn-refresh" class="corner-btn refresh-btn" title="Get the newest version"
+          aria-label="Get the newest version">&#8635;</button>
+
+  <!-- grown-up gate: press and hold for two seconds -->
+  <button id="btn-gear" class="corner-btn gear-btn" title="Grown-ups: press and hold"
+          aria-label="Settings (press and hold)">
+    <svg class="gate-ring" viewBox="0 0 60 60" aria-hidden="true">
+      <circle cx="30" cy="30" r="26" pathLength="100"></circle>
+    </svg>
+    <span>&#9881;</span>
+  </button>
+
+  <h1 class="title">Kanipad</h1>
+
+  <div id="levels" class="levels" role="radiogroup" aria-label="How big are you?"></div>
+  <div id="modes" class="modes"></div>
+</section>
+
+<!-- ============ SONG PICKER ============ -->
+<section id="songs-screen" class="screen hidden">
+  <button class="corner-btn home-btn" data-home title="Back" aria-label="Back to the menu">&#8962;</button>
+  <div id="song-list" class="modes songs"></div>
+</section>
+
+<!-- ============ PLAY SCREEN ============ -->
+<section id="play-screen" class="screen hidden">
+  <header class="play-bar">
+    <button class="bar-btn home-btn" data-home title="Back" aria-label="Back">&#8962;</button>
+
+    <div id="voices" class="bar-group" role="radiogroup" aria-label="Instrument"></div>
+
+    <div id="song-tools" class="bar-group">
+      <button id="btn-listen" class="bar-btn" title="Hear the song" aria-label="Hear the song">&#128066;</button>
+      <div class="song-progress" aria-hidden="true"><div id="song-fill"></div></div>
+    </div>
+
+    <div id="transport" class="bar-group transport">
+      <button id="btn-rec" class="bar-btn rec-btn" title="Record" aria-label="Record"><i></i></button>
+      <button id="btn-play" class="bar-btn play-btn" title="Play" aria-label="Play"><i></i></button>
+      <button id="btn-loop" class="bar-btn loop-btn" title="Loop" aria-label="Loop"
+              aria-pressed="false">&#128257;</button>
+    </div>
+  </header>
+
+  <div id="stage" class="stage"></div>
+</section>
+
+<!-- ============ GROWN-UP SETTINGS ============ -->
+<div id="settings" class="settings hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+  <div class="settings-card">
+    <h2 id="settings-title">Grown-ups</h2>
+    <label class="setting"><input type="checkbox" id="set-voice"> Spoken words</label>
+    <div id="voice-options" class="voice-options">
+      <label class="setting setting-wide">Voice
+        <select id="set-voice-name"></select>
+      </label>
+      <label class="setting setting-wide">Speed
+        <input type="range" id="set-rate" min="0.5" max="1.4" step="0.05">
+      </label>
+      <label class="setting setting-wide">Pitch
+        <input type="range" id="set-pitch" min="0.5" max="2" step="0.05">
+      </label>
+      <button id="voice-try" class="small-btn">&#9654; Try it</button>
+      <p id="voice-none" class="settings-note hidden">This device has no voices to choose from.</p>
+    </div>
+    <button id="erase-tape" class="small-btn">Erase the recording</button>
+    <p class="settings-note">The size (&#128035; / &#128037; / &#128020;) only changes the songs:
+      &#128035; any pad plays the next note, &#128037; the next pad glows,
+      &#128020; it glows only after a pause.</p>
+    <button id="settings-done" class="big-btn">Done</button>
+  </div>
+</div>
+
+<script src="audio.js?v=20261027-1"></script>
+<script src="celebrate.js?v=20261027-1"></script>
+<script src="instruments.js?v=20261027-1"></script>
+<script src="tape.js?v=20261027-1"></script>
+<script src="songs.js?v=20261027-1"></script>
+<script src="app.js?v=20261027-1"></script>
+</body>
+</html>

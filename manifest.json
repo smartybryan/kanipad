@@ -1,0 +1,16 @@
+{
+  "name": "Kanipad",
+  "short_name": "Kanipad",
+  "description": "Kanipad: tap the pads and make music, for the grandkids.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ffe2b0",
+  "theme_color": "#ffcf8a",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

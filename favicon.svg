@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#ffe2b0"/>
+      <stop offset="1" stop-color="#dccbff"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="110" fill="url(#bg)"/>
+  <rect x="62" y="86" width="40" height="340" rx="12" fill="#ff4d4d" stroke="#23262b" stroke-width="8"/>
+  <circle cx="82" cy="116" r="6" fill="#fff" fill-opacity="0.75"/>
+  <circle cx="82" cy="396" r="6" fill="#fff" fill-opacity="0.75"/>
+  <rect x="112" y="97" width="40" height="318" rx="12" fill="#ff9f1c" stroke="#23262b" stroke-width="8"/>
+  <circle cx="132" cy="127" r="6" fill="#fff" fill-opacity="0.75"/>
+  <circle cx="132" cy="385" r="6" fill="#fff" fill-opacity="0.75"/>
+  <rect x="162" y="108" width="40" height="296" rx="12" fill="#ffd23f" stroke="#23262b" stroke-width="8"/>
+  <circle cx="182" cy="138" r="6" fill="#fff" fill-opacity="0.75"/>
+  <circle cx="182" cy="374" r="6" fill="#fff" fill-opacity="0.75"/>
+  <rect x="212" y="119" width="40" height="274" rx="12" fill="#3cc85a" stroke="#23262b" stroke-width="8"/>
+  <circle cx="232" cy="149" r="6" fill="#fff" fill-opacity="0.75"/>
+  <circle cx="232" cy="363" r="6" fill="#fff" fill-opacity="0.75"/>
+  <rect x="262" y="130" width="40" height="252" rx="12" fill="#2ec4b6" stroke="#23262b" stroke-width="8"/>
+  <circle cx="282" cy="160" r="6" fill="#fff" fill-opacity="0.75"/>
+  <circle cx="282" cy="352" r="6" fill="#fff" fill-opacity="0.75"/>
+  <rect x="312" y="141" width="40" height="230" rx="12" fill="#3a86ff" stroke="#23262b" stroke-width="8"/>
+  <circle cx="332" cy="171" r="6" fill="#fff" fill-opacity="0.75"/>
+  <circle cx="332" cy="341" r="6" fill="#fff" fill-opacity="0.75"/>
+  <rect x="362" y="152" width="40" height="208" rx="12" fill="#9b5de5" stroke="#23262b" stroke-width="8"/>
+  <circle cx="382" cy="182" r="6" fill="#fff" fill-opacity="0.75"/>
+  <circle cx="382" cy="330" r="6" fill="#fff" fill-opacity="0.75"/>
+  <rect x="412" y="163" width="40" height="186" rx="12" fill="#ff70a6" stroke="#23262b" stroke-width="8"/>
+  <circle cx="432" cy="193" r="6" fill="#fff" fill-opacity="0.75"/>
+  <circle cx="432" cy="319" r="6" fill="#fff" fill-opacity="0.75"/>
+</svg>

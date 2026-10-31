@@ -1,7 +1,7 @@
 /* --------------------------------------------------------------------------
  * Kanipad: big colored pads that make music. There's no goal; it's an
- * instrument. The pads are tuned to a pentatonic scale, so any banging at all
- * sounds pleasant. Record a tune, play it back, loop it and play along.
+ * instrument. The pads are tuned to the C major scale, C to C, like a toy
+ * xylophone. Record a tune, play it back, loop it and play along.
  * The songs light up the next pad and wait for it, with no tempo.
  * ----------------------------------------------------------------------- */
 
@@ -15,10 +15,10 @@ const $ = id => document.getElementById(id);
 const PAD_COLORS = ['#ff4d4d', '#ff9f1c', '#ffd23f', '#3cc85a', '#2ec4b6', '#3a86ff', '#9b5de5', '#ff70a6'];
 
 const VOICES = [
-  { id: 'piano', icon: '🎹', name: 'Piano!' },
-  { id: 'bells', icon: '🔔', name: 'Bells!' },
-  { id: 'beeps', icon: '🤖', name: 'Robot!' },
-  { id: 'silly', icon: '🤪', name: 'Silly!' },
+  { id: 'piano', icon: '🎹' },
+  { id: 'bells', icon: '🔔' },
+  { id: 'beeps', icon: '🤖' },
+  { id: 'silly', icon: '🤪' },
 ];
 
 // kick, snare, hi-hat, clap, tom, cowbell (in instruments.js order)
@@ -31,10 +31,11 @@ const DRUMS = [
   { icon: '🐮', color: '#3cc85a' },
 ];
 
+// how much help the songs give
 const LEVELS = {
-  hatchling: { icon: '🐣' },   // songs: any pad plays the next note
-  chick:     { icon: '🐥' },   // songs: the next pad glows
-  hen:       { icon: '🐔' },   // songs: it glows only after a pause
+  hatchling: { icon: '🐣', caption: 'Any pad plays the song' },
+  chick:     { icon: '🐥', caption: 'The next pad glows' },
+  hen:       { icon: '🐔', caption: 'Glows after a pause' },
 };
 const HINT_MS = 2500;
 
@@ -42,28 +43,24 @@ const HINT_MS = 2500;
 const KEYS = ['12345678', 'asdfghjk'];
 
 const SETTINGS_KEY = 'kanipad.settings';
-const settings = {
-  level: 'hatchling', voice: true, inst: 'piano',
-  voiceName: '', rate: 0.9, pitch: 1.15,   // '' is the device's default voice
-};
+const settings = { level: 'hatchling', inst: 'piano' };
 
 function loadSettings() {
   try {
-    Object.assign(settings, JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {});
+    const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {};
+    for (const k of Object.keys(settings)) if (k in saved) settings[k] = saved[k];
   } catch (e) { /* private mode, or nothing saved yet */ }
   if (!LEVELS[settings.level]) settings.level = 'hatchling';
   if (!VOICES.some(v => v.id === settings.inst)) settings.inst = 'piano';
-  applySettings();
 }
 
 function saveSettings() {
   try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (e) {}
 }
 
-function applySettings() {
-  Sound.setVoice(settings.voice);
-  Sound.setSpeech(settings);
-}
+// No spoken words: the shared Sound and celebrate() stay quiet.
+Sound.setVoice(false);
+celebrate.say = () => {};
 
 
 /* --------------------------------------------------------------- screens */
@@ -101,6 +98,7 @@ function openView(view, song) {
   $('voices').classList.toggle('hidden', view === 'drums');
   $('transport').classList.toggle('hidden', view === 'song');
   $('song-tools').classList.toggle('hidden', view !== 'song');
+  $('song-head').classList.toggle('hidden', view !== 'song');
 
   show('play-screen');
   if (view === 'song') startSong(song);
@@ -189,7 +187,8 @@ function startSong(song) {
   play.notes = songNotes(song);
   play.pos = 0;
   play.done = false;
-  Sound.say(song.title);
+  $('song-title').textContent = song.title;
+  drawStaff();
   showNext();
 }
 
@@ -203,14 +202,14 @@ function endSong() {
 function songTap(n) {
   if (play.done) {
     // between the cheer and starting over, the pads are just an instrument
-    Instruments.play(settings.inst, n, undefined, 'major');
+    Instruments.play(settings.inst, n);
     flash(padEl(n));
     return;
   }
   const want = play.notes[play.pos].pad;
   // the littlest ones play the song whatever they tap
   if (settings.level === 'hatchling') n = want;
-  Instruments.play(settings.inst, n, undefined, 'major');
+  Instruments.play(settings.inst, n);
   flash(padEl(n));
   if (n === want) advance();
   else nudge(padEl(want));
@@ -233,11 +232,13 @@ function advance() {
   }, 3500);
 }
 
-// Light the pad to tap next (on 🐔 only after a pause), and fill the bar.
+// Light the pad to tap next (on 🐔 only after a pause), mark the note on the
+// staff, and fill the bar.
 function showNext() {
   clearTimeout(play.hint);
   for (const el of stage.querySelectorAll('.next')) el.classList.remove('next');
   $('song-fill').style.width = `${(play.pos / play.notes.length) * 100}%`;
+  markStaff();
   if (play.done) return;
   const el = padEl(play.notes[play.pos].pad);
   if (settings.level === 'hen') play.hint = setTimeout(() => el.classList.add('next'), HINT_MS);
@@ -260,17 +261,119 @@ function listen() {
   const c = Sound.unlock();
   if (!c) return;
   let at = 0.1;
-  for (const { pad, beats } of play.notes) {
-    Instruments.play(settings.inst, pad, c.currentTime + at, 'major');
-    play.listen.push(setTimeout(() => flash(padEl(pad)), at * 1000));
+  for (const [i, { pad, beats }] of play.notes.entries()) {
+    Instruments.play(settings.inst, pad, c.currentTime + at);
+    play.listen.push(setTimeout(() => {
+      flash(padEl(pad));
+      markStaff(i);
+    }, at * 1000));
     at += beats * play.song.beat;
   }
+  // and back to the note to tap once it's over
+  play.listen.push(setTimeout(() => markStaff(), at * 1000 + 300));
 }
 
 function stopListening() {
   for (const id of play.listen) clearTimeout(id);
+  if (play.listen.length) markStaff();
   play.listen = [];
 }
+
+
+/* ----------------------------------------------------------------- staff
+ *
+ * The whole song on treble staves, one note head per note in its pad's color,
+ * wrapped onto as many rows as the screen's width needs, so it's all in view.
+ * Pads 0..7 are C4..C5: C4 sits on a ledger line below the staff. Notes of
+ * two beats or more are open heads (half notes); four beats has no stem (a
+ * whole note). The spacing is even; the beats don't stretch it.
+ *
+ * A glowing ball under the staff sits below the note to play, and glides to
+ * the next one.
+ * ----------------------------------------------------------------------- */
+
+const STAFF = { gap: 34, left: 64, right: 24, rowH: 112, ballY: 98 };
+const staffY = pad => 80 - pad * 5;   // E4 (pad 2) on the bottom line, y 70
+let staffLayout = null;               // { perRow } for the drawn staff
+let staffWidth = 0;                   // the width it was drawn for
+
+function notePlace(i) {
+  const { perRow } = staffLayout;
+  return {
+    x: STAFF.left + (i % perRow) * STAFF.gap + STAFF.gap / 2,
+    top: Math.floor(i / perRow) * STAFF.rowH,
+  };
+}
+
+function drawStaff() {
+  const box = $('staff');
+  const notes = play.notes;
+  // about 0.9 px a unit on a tablet, down to 0.55 on a phone
+  const unit = Math.min(0.9, Math.max(0.55, box.clientWidth / 1100));
+  const fit = Math.max(6, Math.floor((box.clientWidth / unit - STAFF.left - STAFF.right) / STAFF.gap));
+  const rows = Math.ceil(notes.length / fit);
+  const perRow = Math.ceil(notes.length / rows);   // even rows, not a stub at the end
+  staffLayout = { perRow };
+  staffWidth = box.clientWidth;
+
+  const w = STAFF.left + perRow * STAFF.gap + STAFF.right;
+  let out = '';
+  for (let r = 0; r < rows; r++) {
+    const top = r * STAFF.rowH;
+    const n = Math.min(perRow, notes.length - r * perRow);
+    const end = STAFF.left + n * STAFF.gap + 8;
+    out += `<g transform="translate(0 ${top})">${[30, 40, 50, 60, 70]
+      .map(y => `<line class="staff-line" x1="4" x2="${end}" y1="${y}" y2="${y}"/>`).join('')}
+      <line class="staff-line" x1="${end}" x2="${end}" y1="30" y2="70"/>
+      <text class="clef" x="6" y="73">\u{1D11E}</text></g>`;
+  }
+  out += notes.map(({ pad, beats }, i) => {
+    const { x, top } = notePlace(i);
+    const y = top + staffY(pad);
+    const up = pad < 6;   // B4 and above take their stems down
+    const ledger = pad === 0
+      ? `<line class="ledger" x1="${x - 12}" x2="${x + 12}" y1="${top + 80}" y2="${top + 80}"/>` : '';
+    const stem = beats >= 4 ? '' : up
+      ? `<line class="stem" x1="${x + 6.5}" x2="${x + 6.5}" y1="${y - 1}" y2="${y - 33}"/>`
+      : `<line class="stem" x1="${x - 6.5}" x2="${x - 6.5}" y1="${y + 1}" y2="${y + 33}"/>`;
+    return `<g class="note${beats >= 2 ? ' open' : ''}" data-i="${i}" style="--c:${PAD_COLORS[pad]}">${ledger}${stem}
+      <ellipse class="head" cx="${x}" cy="${y}" rx="7.5" ry="5.5" transform="rotate(-20 ${x} ${y})"/></g>`;
+  }).join('');
+
+  box.innerHTML = `<svg viewBox="0 0 ${w} ${rows * STAFF.rowH}" preserveAspectRatio="xMinYMin meet">
+    <defs><filter id="ball-glow" x="-150%" y="-150%" width="400%" height="400%">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter></defs>
+    ${out}
+    <g id="ball" class="ball"><circle class="ball-glow" r="10" filter="url(#ball-glow)"/><circle class="ball-core" r="6"/></g>
+  </svg>`;
+  markStaff(undefined, false);
+}
+
+// Mark the notes already played and the one to play now (by default the next
+// to tap), and move the ball under it.
+function markStaff(now = play.done ? -1 : play.pos, glide = true) {
+  const box = $('staff');
+  for (const g of box.querySelectorAll('.note')) {
+    const i = Number(g.dataset.i);
+    g.classList.toggle('done', !play.done && i < play.pos && i !== now);
+    g.classList.toggle('now', i === now);
+  }
+  const ball = $('ball');
+  if (!ball) return;
+  ball.classList.toggle('hidden-ball', now < 0);
+  if (now < 0) return;
+  const { x, top } = notePlace(now);
+  ball.classList.toggle('glide', glide);
+  ball.style.setProperty('--c', PAD_COLORS[play.notes[now].pad]);
+  ball.style.transform = `translate(${x}px, ${top + STAFF.ballY}px)`;
+}
+
+// a new width can mean a different number of rows
+new ResizeObserver(() => {
+  const w = $('staff').clientWidth;
+  if (play.view === 'song' && w && w !== staffWidth) drawStaff();
+}).observe($('staff'));
 
 
 /* ----------------------------------------------------------- the play bar */
@@ -289,8 +392,7 @@ function buildVoices() {
       settings.inst = v.id;
       saveSettings();
       for (const b of box.children) b.setAttribute('aria-checked', String(b === btn));
-      Instruments.play(v.id, 4, undefined, play.view === 'song' ? 'major' : 'pentatonic');
-      Sound.say(v.name);
+      Instruments.play(v.id, 4);
     });
     box.appendChild(btn);
   }
@@ -356,7 +458,7 @@ function buildMenu() {
     btn.setAttribute('role', 'radio');
     btn.setAttribute('aria-label', id);
     btn.setAttribute('aria-checked', String(settings.level === id));
-    btn.textContent = lv.icon;
+    btn.innerHTML = `<span class="level-face">${lv.icon}</span><span class="level-caption">${lv.caption}</span>`;
     btn.addEventListener('click', () => {
       settings.level = id;
       saveSettings();
@@ -373,7 +475,7 @@ function buildMenu() {
     const btn = document.createElement('button');
     btn.className = 'mode-tile';
     btn.setAttribute('aria-label', m.label);
-    btn.innerHTML = m.tile();
+    btn.innerHTML = `${m.tile()}<span class="tile-caption">${m.label}</span>`;
     btn.addEventListener('click', m.open);
     modes.appendChild(btn);
   }
@@ -384,7 +486,7 @@ function buildMenu() {
     const btn = document.createElement('button');
     btn.className = 'mode-tile';
     btn.setAttribute('aria-label', song.title);
-    btn.innerHTML = `<span class="tile-emoji">${song.icon}</span>`;
+    btn.innerHTML = `<span class="tile-emoji">${song.icon}</span><span class="tile-caption">${song.title}</span>`;
     btn.addEventListener('click', () => openView('song', song));
     songs.appendChild(btn);
   }
@@ -411,60 +513,11 @@ function holdToOpen(btn, ms, open) {
 }
 
 function openSettings() {
-  $('set-voice').checked = settings.voice;
-  $('set-rate').value = settings.rate;
-  $('set-pitch').value = settings.pitch;
   $('erase-tape').disabled = !Tape.state().hasTape;
-  fillVoices();
-  showVoiceOptions();
   $('settings').classList.remove('hidden');
 }
 
-// Each device has its own voices, so the choice is saved per device. A saved
-// voice this device doesn't have shows as the default, and is kept as-is.
-function fillVoices() {
-  const select = $('set-voice-name');
-  const voices = Sound.voices();
-  // the list can arrive while the dialog is open; keep a pick not yet saved
-  const wanted = select.options.length && !$('settings').classList.contains('hidden')
-    ? select.value : settings.voiceName;
-  select.innerHTML = '';
-  select.add(new Option('Device default', ''));
-  for (const v of voices) {
-    const region = v.lang.replace(/^[a-z]+[-_]?/i, '');
-    select.add(new Option(region ? `${v.name} (${region})` : v.name, v.name));
-  }
-  select.value = voices.some(v => v.name === wanted) ? wanted : '';
-  const none = voices.length === 0;
-  $('voice-none').classList.toggle('hidden', !none);
-  select.closest('.setting').classList.toggle('hidden', none);
-}
-
-function showVoiceOptions() {
-  $('voice-options').classList.toggle('hidden', !$('set-voice').checked);
-}
-
-function readVoiceForm() {
-  settings.voiceName = $('set-voice-name').value;
-  settings.rate = Number($('set-rate').value);
-  settings.pitch = Number($('set-pitch').value);
-  Sound.setSpeech(settings);
-}
-
-const SAMPLES = ['Twinkle, Twinkle, Little Star', 'Great job!', 'Piano!', 'Hooray!', 'Silly!'];
-let sample = 0;
-
-function trySpeech() {
-  readVoiceForm();
-  Sound.setVoice(true);
-  Sound.say(SAMPLES[sample++ % SAMPLES.length]);
-}
-
 function closeSettings() {
-  settings.voice = $('set-voice').checked;
-  readVoiceForm();
-  saveSettings();
-  applySettings();
   $('settings').classList.add('hidden');
 }
 
@@ -508,11 +561,6 @@ $('btn-listen').addEventListener('click', listen);
 $('btn-refresh').addEventListener('click', refreshApp);
 $('settings-done').addEventListener('click', closeSettings);
 $('erase-tape').addEventListener('click', eraseTape);
-$('set-voice').addEventListener('change', showVoiceOptions);
-$('voice-try').addEventListener('click', trySpeech);
-// hear each change as soon as it's made (a slider when it's let go)
-for (const id of ['set-voice-name', 'set-rate', 'set-pitch']) $(id).addEventListener('change', trySpeech);
-Sound.onVoices(() => { if (!$('settings').classList.contains('hidden')) fillVoices(); });
 holdToOpen($('btn-gear'), 2000, openSettings);
 
 document.addEventListener('keydown', e => {

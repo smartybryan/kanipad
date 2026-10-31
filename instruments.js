@@ -2,12 +2,11 @@
  * The instruments. Every sound is synthesized (oscillators, noise, filters),
  * so there are no asset files. Needs audio.js loaded first.
  *
- *   Instruments.play(id, n, when, scale)
+ *   Instruments.play(id, n, when)
  *       id     'piano' | 'bells' | 'beeps' | 'silly' | 'drums'
- *       n      pad number: 0..7 low to high, or the drum number 0..5
+ *       n      pad number: 0..7 low to high (C major, C4 to C5), or the drum
+ *              number 0..5
  *       when   AudioContext time to start; omitted means now
- *       scale  'pentatonic' (free play: anything sounds nice) or 'major'
- *              (songs, which need F and B)
  *
  * Every note has a quick attack and a smooth release so nothing clicks, and
  * everything goes through the limiter in Sound.bus(), so ten fingers at once
@@ -17,13 +16,10 @@
 const Instruments = (() => {
   const C4 = 261.63;
 
-  // semitones above middle C for pads 0..7
-  const SCALES = {
-    pentatonic: [0, 2, 4, 7, 9, 12, 14, 16],   // C D E G A C D E
-    major:      [0, 2, 4, 5, 7, 9, 11, 12],    // C D E F G A B C
-  };
+  // semitones above middle C for pads 0..7: C D E F G A B C
+  const MAJOR = [0, 2, 4, 5, 7, 9, 11, 12];
 
-  const freq = (scale, n) => C4 * 2 ** (SCALES[scale][n] / 12);
+  const freq = n => C4 * 2 ** (MAJOR[n] / 12);
 
   // A gain node that swells in over `attack` and dies away over `decay`.
   function envelope(c, when, peak, attack, decay, dest = Sound.bus()) {
@@ -154,12 +150,12 @@ const Instruments = (() => {
     },
   ];
 
-  function play(id, n, when, scale = 'pentatonic') {
+  function play(id, n, when) {
     const c = Sound.unlock();
     if (!c) return;
     const t = Math.max(when ?? 0, c.currentTime);
     if (id === 'drums') DRUMS[n]?.(c, t);
-    else MELODIC[id]?.(c, freq(scale, n), t);
+    else MELODIC[id]?.(c, freq(n), t);
   }
 
   return { play, MELODIC: Object.keys(MELODIC), DRUM_COUNT: DRUMS.length, PADS: 8 };

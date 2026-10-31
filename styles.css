@@ -58,7 +58,7 @@ button {
   overflow-y: auto;
 }
 
-#songs-screen { justify-content: center; padding-top: 90px; }
+#songs-screen { justify-content: center; gap: 32px; padding-top: 90px; }
 
 .title {
   margin: 4px 0 0;
@@ -129,20 +129,40 @@ button {
 }
 
 .level-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 104px;
+  padding: 0;
+  background: none;
+  border: 0;
+  opacity: .55;
+  transition: opacity .15s;
+}
+
+.level-face {
+  display: grid;
+  place-items: center;
   font-size: 44px;
   width: 84px;
   height: 84px;
-  padding: 0;
   background: var(--paper);
   border: 4px solid var(--ink);
   border-radius: 50%;
   box-shadow: var(--shadow);
-  opacity: .55;
-  transition: transform .15s, opacity .15s;
+  transition: transform .15s;
 }
 
-.level-btn[aria-checked="true"] {
-  opacity: 1;
+.level-caption {
+  font-size: 15px;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.level-btn[aria-checked="true"] { opacity: 1; }
+
+.level-btn[aria-checked="true"] .level-face {
   background: var(--accent);
   transform: scale(1.12);
 }
@@ -169,14 +189,17 @@ button {
   border: 4px solid var(--ink);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  display: grid;
-  place-items: center;
-  padding: 8%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6%;
 }
 
 .mode-tile:active { transform: translateY(4px); box-shadow: none; }
 
-.tile-art { width: 100%; height: 100%; }
+.tile-art { width: 100%; flex: 1; min-height: 0; }
 
 .tile-emoji {
   font-size: clamp(36px, 9vmin, 72px);
@@ -184,7 +207,17 @@ button {
   text-align: center;
 }
 
-.songs .tile-emoji { font-size: clamp(56px, 14vmin, 96px); }
+.songs .tile-emoji { font-size: clamp(44px, 10vmin, 76px); line-height: 1; }
+
+.tile-caption {
+  font-size: clamp(13px, 2.2vmin, 17px);
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: center;
+}
+
+/* the menu's tiles are bigger, and so are their names */
+.modes:not(.songs) .tile-caption { font-size: clamp(15px, 3vmin, 22px); }
 
 /* music notes drifting up behind the menu */
 .deco { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
@@ -305,6 +338,63 @@ button {
   background: linear-gradient(90deg, #ff4d4d, #ffd23f, #3cc85a, #3a86ff, #9b5de5);
   transition: width .2s;
 }
+
+/* songs: the title, and the song on a staff with the note to play marked */
+.song-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0 max(14px, env(safe-area-inset-right)) 4px max(14px, env(safe-area-inset-left));
+}
+
+.song-title {
+  margin: 0;
+  font-size: clamp(20px, 4vmin, 32px);
+  line-height: 1.1;
+  text-align: center;
+}
+
+.staff {
+  width: 100%;
+  max-width: 1000px;
+  padding: 6px 8px 0;
+  background: var(--paper);
+  border: 4px solid var(--ink);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+}
+
+.staff svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 34vh;
+}
+
+.staff-line, .ledger { stroke: var(--ink); stroke-width: 1.4; }
+.clef { font-size: 58px; fill: var(--ink); font-family: "Apple Symbols", "Noto Music", "Segoe UI Symbol", serif; }
+
+.note { transition: opacity .25s; }
+.note .stem { stroke: var(--ink); stroke-width: 1.6; }
+.note .head { fill: var(--c); stroke: var(--ink); stroke-width: 1.6; }
+.note.open .head { fill: var(--paper); stroke: var(--c); stroke-width: 3; }
+.note.done { opacity: .3; }
+.note.now .head { stroke-width: 2.6; }
+
+/* the glowing ball under the note to play */
+.ball { transition: opacity .2s; }
+.ball.glide { transition: transform .3s cubic-bezier(.3, 1.4, .6, 1), opacity .2s; }
+.ball.hidden-ball { opacity: 0; }
+.ball-glow { fill: var(--c); opacity: .8; transform-box: fill-box; transform-origin: center;
+             animation: ball-pulse .7s ease-in-out infinite alternate; }
+.ball-core { fill: color-mix(in srgb, var(--c) 45%, #fff); stroke: var(--c); stroke-width: 1.5; }
+
+@keyframes ball-pulse {
+  from { transform: scale(.8); opacity: .55; }
+  to   { transform: scale(1.25); opacity: .95; }
+}
+
 
 .stage {
   flex: 1;
@@ -449,43 +539,7 @@ body.recording .stage { box-shadow: inset 0 0 0 6px var(--rec); }
 
 .settings-card h2 { margin: 0; font-size: 28px; }
 
-.setting {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 22px;
-}
-
-.setting input[type="checkbox"] { width: 28px; height: 28px; }
-
 .settings-note { margin: 0; font-size: 15px; opacity: .7; }
-
-.voice-options {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 12px 14px;
-  border: 3px dashed rgba(35, 38, 43, .25);
-  border-radius: 16px;
-}
-
-.setting-wide { justify-content: space-between; }
-
-.setting-wide select,
-.setting-wide input[type="range"] {
-  flex: 1;
-  max-width: 230px;
-  min-width: 0;
-}
-
-.setting-wide select {
-  font: inherit;
-  font-size: 17px;
-  padding: 6px 8px;
-  border: 3px solid var(--ink);
-  border-radius: 12px;
-  background: #fff;
-}
 
 .small-btn {
   align-self: flex-start;

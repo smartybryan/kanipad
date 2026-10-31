@@ -9,18 +9,18 @@ full screen, without an address bar.
 
 ## Playing
 
-The menu has three tiles:
+The menu has three tiles, each with its name underneath:
 
 | Tile | What it is |
 |---|---|
 | rainbow bars | **Pads.** Eight xylophone bars, low to high. Landscape: low on the left. Portrait: low at the bottom. |
 | 🐘🐶🐭🐮 | **Animal drums.** 🐘 kick, 🐶 snare, 🐭 hi-hat, 👏 clap, 🐻 tom, 🐮 cowbell. |
-| ⭐🐑🎵 | **Songs.** ⭐ Twinkle Twinkle, 🐑 Mary Had a Little Lamb, 🍞 Hot Cross Buns, 🚣 Row Your Boat, 😊 Ode to Joy. |
+| ⭐🐑🎵 | **Songs.** ⭐ Twinkle Twinkle, 🐑 Mary Had a Little Lamb, 🍞 Hot Cross Buns, 🚣 Row Your Boat, 😊 Ode to Joy. Each tile has the title underneath. |
 
-The pads are tuned to a **pentatonic scale** (C D E G A C D E), so any
-combination at all sounds pleasant. Along the top, pick the sound: 🎹 piano,
-🔔 bells, 🤖 robot beeps, 🤪 silly (slides into the note and goes "wah"). Each
-one says its name when picked.
+The pads are tuned to the **C major scale** (C D E F G A B C), like a toy
+xylophone, and the songs use the same eight notes. Along the top, pick the
+sound: 🎹 piano, 🔔 bells, 🤖 robot beeps, 🤪 silly (slides into the note and
+goes "wah").
 
 Every finger is its own note, so chords and two-handed banging work, and
 sliding a finger across the bars plays each one it crosses. On a laptop, keys
@@ -46,13 +46,19 @@ replaces it (an empty take doesn't), or a grown-up erases it.
 
 ### Songs
 
+The song's title is at the top, over the whole song written on treble staves
+(as many rows as the screen's width needs), each note head in its pad's color.
+A glowing ball under the staff sits below the note to play and glides to the
+next one; notes already played fade. 👂 moves the ball through the song as it
+plays. Half notes are open heads.
+
 The next pad to tap glows, and the song waits for it; there's no tempo. A
 wrong pad still plays its note (it's an instrument) and the right one bounces.
 **👂** plays the whole song through in time so it can be heard first. The bar
 along the top fills up, and at the end there's a party and the song starts
-over. Songs use the C major scale instead (C D E F G A B C), since most need F.
+over.
 
-The size on the menu changes only the songs:
+The size buttons above the songs set how much help they give:
 
 | | |
 |---|---|
@@ -63,8 +69,7 @@ The size on the menu changes only the songs:
 ## Grown-ups
 
 **Press and hold ⚙ for two seconds** (the ring fills up) to open the settings:
-spoken words on/off, the device voice with its speed and pitch, and **Erase the
-recording**. Settings are kept in `localStorage`.
+**Erase the recording**. The app never speaks. Settings are kept in `localStorage`.
 
 **No sound on an iPhone?** The app asks Safari to treat it as media playback
 (`navigator.audioSession`, Safari 16.4 and later), so the silent switch leaves

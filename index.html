@@ -19,7 +19,7 @@
 <!-- Asset URLs carry a version stamp so a home-screen copy can't keep serving
      an old file. BUMP EVERY VERSION STAMP WHENEVER A .js FILE OR styles.css
      CHANGES. See "Shipping a new version" in the README. -->
-<link rel="stylesheet" href="styles.css?v=20261027-1">
+<link rel="stylesheet" href="styles.css?v=20261031-5">
 </head>
 <body>
 
@@ -43,13 +43,13 @@
 
   <h1 class="title">Kanipad</h1>
 
-  <div id="levels" class="levels" role="radiogroup" aria-label="How big are you?"></div>
   <div id="modes" class="modes"></div>
 </section>
 
 <!-- ============ SONG PICKER ============ -->
 <section id="songs-screen" class="screen hidden">
   <button class="corner-btn home-btn" data-home title="Back" aria-label="Back to the menu">&#8962;</button>
+  <div id="levels" class="levels" role="radiogroup" aria-label="How much help?"></div>
   <div id="song-list" class="modes songs"></div>
 </section>
 
@@ -73,6 +73,11 @@
     </div>
   </header>
 
+  <div id="song-head" class="song-head hidden">
+    <h2 id="song-title" class="song-title"></h2>
+    <div id="staff" class="staff" aria-hidden="true"></div>
+  </div>
+
   <div id="stage" class="stage"></div>
 </section>
 
@@ -80,33 +85,19 @@
 <div id="settings" class="settings hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title">
   <div class="settings-card">
     <h2 id="settings-title">Grown-ups</h2>
-    <label class="setting"><input type="checkbox" id="set-voice"> Spoken words</label>
-    <div id="voice-options" class="voice-options">
-      <label class="setting setting-wide">Voice
-        <select id="set-voice-name"></select>
-      </label>
-      <label class="setting setting-wide">Speed
-        <input type="range" id="set-rate" min="0.5" max="1.4" step="0.05">
-      </label>
-      <label class="setting setting-wide">Pitch
-        <input type="range" id="set-pitch" min="0.5" max="2" step="0.05">
-      </label>
-      <button id="voice-try" class="small-btn">&#9654; Try it</button>
-      <p id="voice-none" class="settings-note hidden">This device has no voices to choose from.</p>
-    </div>
     <button id="erase-tape" class="small-btn">Erase the recording</button>
-    <p class="settings-note">The size (&#128035; / &#128037; / &#128020;) only changes the songs:
+    <p class="settings-note">The size (&#128035; / &#128037; / &#128020;) above the songs sets how much help they give:
       &#128035; any pad plays the next note, &#128037; the next pad glows,
       &#128020; it glows only after a pause.</p>
     <button id="settings-done" class="big-btn">Done</button>
   </div>
 </div>
 
-<script src="audio.js?v=20261027-1"></script>
-<script src="celebrate.js?v=20261027-1"></script>
-<script src="instruments.js?v=20261027-1"></script>
-<script src="tape.js?v=20261027-1"></script>
-<script src="songs.js?v=20261027-1"></script>
-<script src="app.js?v=20261027-1"></script>
+<script src="audio.js?v=20261031-5"></script>
+<script src="celebrate.js?v=20261031-5"></script>
+<script src="instruments.js?v=20261031-5"></script>
+<script src="tape.js?v=20261031-5"></script>
+<script src="songs.js?v=20261031-5"></script>
+<script src="app.js?v=20261031-5"></script>
 </body>
 </html>

@@ -75,6 +75,7 @@ function show(screen) {
 function goHome() {
   Tape.stop();
   Tape.stopRecording();
+  Voice.stop();
   endSong();
   play.view = null;
   $('stage').innerHTML = '';
@@ -376,6 +377,85 @@ new ResizeObserver(() => {
 }).observe($('staff'));
 
 
+/* --------------------------------------------------------- silly voices
+ *
+ * Tap 🎤 to record (it stops by itself after a few seconds), then the animals
+ * play it back, from 🐘 way down low to 🐭 way up high.
+ * ----------------------------------------------------------------------- */
+
+const PITCHES = [
+  { icon: '🐘', rate: 0.5,  color: '#9b5de5', label: 'elephant: way down low' },
+  { icon: '🐻', rate: 0.72, color: '#3a86ff', label: 'bear: low' },
+  { icon: '🙂', rate: 1,    color: '#3cc85a', label: 'me: just as I said it' },
+  { icon: '🐱', rate: 1.45, color: '#ff9f1c', label: 'cat: high' },
+  { icon: '🐭', rate: 2,    color: '#ff70a6', label: 'mouse: way up high' },
+];
+
+function buildPitches() {
+  const box = $('pitches');
+  box.innerHTML = '';
+  for (const p of PITCHES) {
+    const btn = document.createElement('button');
+    btn.className = 'pitch-btn';
+    btn.style.setProperty('--c', p.color);
+    btn.setAttribute('aria-label', p.label);
+    btn.textContent = p.icon;
+    btn.addEventListener('pointerdown', e => {
+      e.preventDefault();
+      if (!Voice.has() || Voice.recording()) return;
+      Voice.play(p.rate);
+      btn.animate(
+        [{ transform: 'none' }, { transform: 'scale(1.15) rotate(-8deg)' },
+         { transform: 'scale(1.1) rotate(8deg)' }, { transform: 'none' }],
+        { duration: 450 / p.rate + 150, easing: 'ease-in-out' });
+    });
+    btn.addEventListener('contextmenu', e => e.preventDefault());
+    box.appendChild(btn);
+  }
+}
+
+function showVoice() {
+  const mic = $('mic-btn');
+  const on = Voice.recording();
+  mic.classList.toggle('on', on);
+  mic.setAttribute('aria-label', on ? 'Stop recording' : 'Record your voice');
+  $('pitches').classList.toggle('empty', !Voice.has() || on);
+}
+
+function openVoice() {
+  Sound.unlock();
+  show('voice-screen');
+  showVoice();
+}
+
+$('mic-btn').addEventListener('click', () => {
+  const mic = $('mic-btn');
+  if (Voice.recording()) {
+    Voice.stop();
+    return;
+  }
+  Voice.record({
+    onLevel: level => mic.style.setProperty('--level', level.toFixed(3)),
+    onDone: ok => {
+      mic.style.setProperty('--level', 0);
+      showVoice();
+      if (ok) {
+        // a little fanfare: it's ready to play
+        Sound.cheer();
+      } else {
+        mic.animate(
+          [{ transform: 'none' }, { transform: 'translateX(-12px)' }, { transform: 'translateX(12px)' },
+           { transform: 'translateX(-6px)' }, { transform: 'none' }],
+          { duration: 450, easing: 'ease-out' });
+      }
+    },
+  });
+  // the progress ring fills over the recording time
+  mic.style.setProperty('--max', `${Voice.MAX_SECONDS}s`);
+  showVoice();
+});
+
+
 /* ----------------------------------------------------------- the play bar */
 
 function buildVoices() {
@@ -446,6 +526,11 @@ const MODES = [
     id: 'songs', label: 'Songs',
     tile: () => '<span class="tile-emoji">⭐🐑<br>🎵</span>',
     open: () => show('songs-screen'),
+  },
+  {
+    id: 'voice', label: 'Silly voices',
+    tile: () => '<span class="tile-emoji">🎤<br>🐭🐘</span>',
+    open: openVoice,
   },
 ];
 
@@ -566,7 +651,8 @@ holdToOpen($('btn-gear'), 2000, openSettings);
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     if (!$('settings').classList.contains('hidden')) return;
-    if (play.view || !$('songs-screen').classList.contains('hidden')) back();
+    if (play.view || !$('songs-screen').classList.contains('hidden') ||
+        !$('voice-screen').classList.contains('hidden')) back();
     return;
   }
   if (!play.view || e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
@@ -585,4 +671,5 @@ settleAfterRefresh();
 loadSettings();
 buildMenu();
 buildVoices();
+buildPitches();
 showTape(Tape.state());

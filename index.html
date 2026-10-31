@@ -19,7 +19,7 @@
 <!-- Asset URLs carry a version stamp so a home-screen copy can't keep serving
      an old file. BUMP EVERY VERSION STAMP WHENEVER A .js FILE OR styles.css
      CHANGES. See "Shipping a new version" in the README. -->
-<link rel="stylesheet" href="styles.css?v=20261031-5">
+<link rel="stylesheet" href="styles.css?v=20261031-6">
 </head>
 <body>
 
@@ -51,6 +51,18 @@
   <button class="corner-btn home-btn" data-home title="Back" aria-label="Back to the menu">&#8962;</button>
   <div id="levels" class="levels" role="radiogroup" aria-label="How much help?"></div>
   <div id="song-list" class="modes songs"></div>
+</section>
+
+<!-- ============ SILLY VOICES ============ -->
+<section id="voice-screen" class="screen hidden">
+  <button class="corner-btn home-btn" data-home title="Back" aria-label="Back to the menu">&#8962;</button>
+  <button id="mic-btn" class="mic-btn" aria-label="Record your voice">
+    <svg class="mic-ring" viewBox="0 0 100 100" aria-hidden="true">
+      <circle cx="50" cy="50" r="46" pathLength="100"></circle>
+    </svg>
+    <span class="mic-face" aria-hidden="true">&#127908;</span>
+  </button>
+  <div id="pitches" class="pitches" aria-label="Play it back"></div>
 </section>
 
 <!-- ============ PLAY SCREEN ============ -->
@@ -93,11 +105,12 @@
   </div>
 </div>
 
-<script src="audio.js?v=20261031-5"></script>
-<script src="celebrate.js?v=20261031-5"></script>
-<script src="instruments.js?v=20261031-5"></script>
-<script src="tape.js?v=20261031-5"></script>
-<script src="songs.js?v=20261031-5"></script>
-<script src="app.js?v=20261031-5"></script>
+<script src="audio.js?v=20261031-6"></script>
+<script src="celebrate.js?v=20261031-6"></script>
+<script src="instruments.js?v=20261031-6"></script>
+<script src="tape.js?v=20261031-6"></script>
+<script src="voice.js?v=20261031-6"></script>
+<script src="songs.js?v=20261031-6"></script>
+<script src="app.js?v=20261031-6"></script>
 </body>
 </html>

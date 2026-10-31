@@ -9,13 +9,14 @@ full screen, without an address bar.
 
 ## Playing
 
-The menu has three tiles, each with its name underneath:
+The menu has four tiles, each with its name underneath:
 
 | Tile | What it is |
 |---|---|
 | rainbow bars | **Pads.** Eight xylophone bars, low to high. Landscape: low on the left. Portrait: low at the bottom. |
 | 🐘🐶🐭🐮 | **Animal drums.** 🐘 kick, 🐶 snare, 🐭 hi-hat, 👏 clap, 🐻 tom, 🐮 cowbell. |
 | ⭐🐑🎵 | **Songs.** ⭐ Twinkle Twinkle, 🐑 Mary Had a Little Lamb, 🍞 Hot Cross Buns, 🚣 Row Your Boat, 😊 Ode to Joy. Each tile has the title underneath. |
+| 🎤🐭🐘 | **Silly voices.** Record your voice, then hear it way down low or way up high. |
 
 The pads are tuned to the **C major scale** (C D E F G A B C), like a toy
 xylophone, and the songs use the same eight notes. Along the top, pick the
@@ -66,6 +67,21 @@ The size buttons above the songs set how much help they give:
 | 🐥 | the next pad glows |
 | 🐔 | it glows only after a 2.5 s pause, or after a wrong tap |
 
+### Silly voices
+
+Tap **🎤** and say something; it turns red and the ring around it fills up
+over five seconds, then it stops by itself (or tap it again to stop sooner).
+The animals play it back: 🐘 way down low, 🐻 low, 🙂 just as it was said,
+🐱 high, 🐭 way up high. Faster is higher and slower is lower, like a
+tape sped up, which is the whole joke.
+
+The recording is cut down to just the voice and leveled, and kept only until
+the app is closed. If 🎤 just shakes, there's no microphone, it was refused,
+or nothing was heard. The microphone only works on a secure page (the
+GitHub Pages address, or `localhost`); Safari won't offer it to a page opened
+straight off disk. On an iPhone the app switches its audio session to
+play-and-record only while recording.
+
 ## Grown-ups
 
 **Press and hold ⚙ for two seconds** (the ring fills up) to open the settings:
@@ -95,6 +111,7 @@ address with `cache: 'reload'` so the next launch is fresh too.
     instruments.js   the synthesized instruments and drums
     tape.js          record, play back, loop and overdub, on the audio clock
     songs.js         the play-along songs
+    voice.js         silly voices: record from the mic, play back at a pitch
     audio.js         Sound: unlock, tone, cheer, say -- shared with Pop!
     celebrate.js     celebrate(): confetti, cheer, kind words -- shared with Pop!
     manifest.json    name, colors and icons for a home-screen launch
@@ -140,4 +157,4 @@ used for 👂).
 - A few saved recordings with picture labels, instead of one tape.
 - Animal noises: real samples (short mp3s) on the drums screen.
 - A 16-step sequencer grid for the 7–8s.
-- Record your voice and play it back at different pitches (chipmunk / giant).
+- Silly voices on the pads: your recording as an instrument, one pitch per pad.

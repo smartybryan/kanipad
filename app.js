@@ -379,7 +379,7 @@ new ResizeObserver(() => {
 
 /* --------------------------------------------------------- silly voices
  *
- * Tap 🎤 to record (it stops by itself after a few seconds), then the animals
+ * Hold 🎤 down to record (it stops when let go, or after a few seconds), then the animals
  * play it back, from 🐘 way down low to 🐭 way up high.
  * ----------------------------------------------------------------------- */
 
@@ -418,7 +418,7 @@ function showVoice() {
   const mic = $('mic-btn');
   const on = Voice.recording();
   mic.classList.toggle('on', on);
-  mic.setAttribute('aria-label', on ? 'Stop recording' : 'Record your voice');
+  mic.setAttribute('aria-label', on ? 'Recording: let go to stop' : 'Hold to record your voice');
   $('pitches').classList.toggle('empty', !Voice.has() || on);
 }
 
@@ -428,21 +428,21 @@ function openVoice() {
   showVoice();
 }
 
-$('mic-btn').addEventListener('click', () => {
-  const mic = $('mic-btn');
-  if (Voice.recording()) {
-    Voice.stop();
-    return;
-  }
+// Records only while 🎤 is held down (up to Voice.MAX_SECONDS); letting go stops.
+const mic = $('mic-btn');
+
+function startMic() {
+  if (Voice.recording()) return;
+  mic.style.setProperty('--max', `${Voice.MAX_SECONDS}s`);   // the ring fills over this
   Voice.record({
     onLevel: level => mic.style.setProperty('--level', level.toFixed(3)),
-    onDone: ok => {
+    onDone: (ok, why) => {
       mic.style.setProperty('--level', 0);
       showVoice();
-      if (ok) {
-        // a little fanfare: it's ready to play
-        Sound.cheer();
-      } else {
+      if (ok) Sound.cheer();   // a little fanfare: it's ready to play
+      // let go while the browser was still asking for the mic: no fuss, the
+      // next press records
+      else if (why !== 'cancelled') {
         mic.animate(
           [{ transform: 'none' }, { transform: 'translateX(-12px)' }, { transform: 'translateX(12px)' },
            { transform: 'translateX(-6px)' }, { transform: 'none' }],
@@ -450,10 +450,30 @@ $('mic-btn').addEventListener('click', () => {
       }
     },
   });
-  // the progress ring fills over the recording time
-  mic.style.setProperty('--max', `${Voice.MAX_SECONDS}s`);
   showVoice();
+}
+
+function stopMic() {
+  if (Voice.recording()) Voice.stop();
+}
+
+mic.addEventListener('pointerdown', e => {
+  e.preventDefault();
+  // keep the press even if the finger slides off the button
+  try { mic.setPointerCapture(e.pointerId); } catch (err) {}
+  startMic();
 });
+for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) mic.addEventListener(type, stopMic);
+mic.addEventListener('contextmenu', e => e.preventDefault());
+
+// on a keyboard, hold Space or Enter
+mic.addEventListener('keydown', e => {
+  if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) { e.preventDefault(); startMic(); }
+});
+mic.addEventListener('keyup', e => {
+  if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); stopMic(); }
+});
+mic.addEventListener('blur', stopMic);
 
 
 /* ----------------------------------------------------------- the play bar */

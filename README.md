@@ -69,14 +69,15 @@ The size buttons above the songs set how much help they give:
 
 ### Silly voices
 
-Tap **🎤** and say something; it turns red and the ring around it fills up
-over five seconds, then it stops by itself (or tap it again to stop sooner).
+Hold **🎤** down and say something; it records only while it's held. It
+turns red and the ring around it fills up over five seconds, and letting go
+stops it (so does reaching the end of the ring).
 The animals play it back: 🐘 way down low, 🐻 low, 🙂 just as it was said,
 🐱 high, 🐭 way up high. Faster is higher and slower is lower, like a
 tape sped up, which is the whole joke.
 
 The recording is cut down to just the voice and leveled, and kept only until
-the app is closed. If 🎤 just shakes, there's no microphone, it was refused,
+the app is closed. If 🎤 just shakes, there's no microphone, it was refused, the press was too quick,
 or nothing was heard. The microphone only works on a secure page (the
 GitHub Pages address, or `localhost`); Safari won't offer it to a page opened
 straight off disk. On an iPhone the app switches its audio session to

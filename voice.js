@@ -3,10 +3,12 @@
  * faster (higher, a chipmunk) or slower (lower, a giant). Needs audio.js.
  *
  *   Voice.record({ onLevel, onDone })   start; onLevel(0..1) as the voice
- *                                       gets louder, onDone(ok) when it's
- *                                       stopped and ready (ok is false if
- *                                       there's no mic, it was refused, or
- *                                       nothing was heard)
+ *                                       gets louder, onDone(ok, why) when
+ *                                       it's stopped and ready. When ok is
+ *                                       false, why is 'cancelled' (stopped
+ *                                       before the mic was granted), 'no-mic'
+ *                                       (none, or refused) or 'quiet'
+ *                                       (nothing heard)
  *   Voice.stop()                        stop recording early
  *   Voice.recording()                   true while recording
  *   Voice.has()                         true once there's a clip to play
@@ -39,7 +41,7 @@ const Voice = (() => {
   async function record({ onLevel = () => {}, onDone = () => {} } = {}) {
     if (rec) return;
     const c = Sound.unlock();
-    if (!c || !supported()) { onDone(false); return; }
+    if (!c || !supported()) { onDone(false, 'no-mic'); return; }
 
     rec = { chunks: [], onDone };
     const mine = rec;
@@ -50,9 +52,11 @@ const Voice = (() => {
         audio: { echoCancellation: true, noiseSuppression: true },
       });
     } catch (e) {
-      rec = null;
+      // stopped while the prompt was up, then refused: still just cancelled
+      const why = rec === mine ? 'no-mic' : 'cancelled';
+      if (rec === mine) rec = null;
       session('playback');
-      onDone(false);
+      if (why === 'no-mic') onDone(false, why);
       return;
     }
     // stopped (or the screen left) while the permission prompt was up
@@ -105,11 +109,12 @@ const Voice = (() => {
       const { onDone } = rec;
       rec = null;
       session('playback');
-      onDone(false);
+      onDone(false, 'cancelled');
     }
   }
 
   async function finish(r) {
+    let why = 'quiet';
     r.cleanup?.();
     r.stream.getTracks().forEach(t => t.stop());
     session('playback');
@@ -122,7 +127,7 @@ const Voice = (() => {
       const trimmed = trim(c, raw);
       if (trimmed) { clip = trimmed; ok = true; }
     } catch (e) { /* couldn't decode it; keep whatever clip there was */ }
-    r.onDone(ok);
+    r.onDone(ok, ok ? undefined : why);
   }
 
   // Cut the silence off both ends and bring the loudest part up to 0.9.
